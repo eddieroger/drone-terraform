@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"strconv"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -105,7 +106,7 @@ func installCaCert(cacert string) *exec.Cmd {
 
 func exportSecrets(secrets map[string]string) {
 	for k, v := range secrets {
-		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
+		os.Setenv(fmt.Sprintf("%s", k), strconv.Quote(fmt.Sprintf("%s", os.Getenv(v))))
 	}
 }
 
