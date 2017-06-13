@@ -50,6 +50,7 @@ func (p Plugin) Exec() error {
 	var commands []*exec.Cmd
 
 	if len(p.Config.Secrets) != 0 {
+
 		exportSecrets(p.Config.Secrets)
 	}
 
@@ -106,7 +107,10 @@ func installCaCert(cacert string) *exec.Cmd {
 
 func exportSecrets(secrets map[string]string) {
 	for k, v := range secrets {
-		os.Setenv(fmt.Sprintf("%s", k), strconv.Quote(fmt.Sprintf("%s", os.Getenv(v))))
+		logrus.WithFields(logrus.Fields{
+			"key": k,
+		}).Warn("Setting key!")
+		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
 	}
 }
 
