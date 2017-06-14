@@ -179,7 +179,7 @@ func planCommand(config Config) *exec.Cmd {
 	}
 	for k, v := range config.Secrets {
 		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
+		args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
