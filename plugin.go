@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-	"strconv"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -50,7 +49,6 @@ func (p Plugin) Exec() error {
 	var commands []*exec.Cmd
 
 	if len(p.Config.Secrets) != 0 {
-
 		exportSecrets(p.Config.Secrets)
 	}
 
@@ -107,9 +105,6 @@ func installCaCert(cacert string) *exec.Cmd {
 
 func exportSecrets(secrets map[string]string) {
 	for k, v := range secrets {
-		logrus.WithFields(logrus.Fields{
-			"key": k,
-		}).Warn("Setting key!")
 		os.Setenv(fmt.Sprintf("%s", k), fmt.Sprintf("%s", os.Getenv(v)))
 	}
 }
@@ -171,6 +166,7 @@ func planCommand(config Config) *exec.Cmd {
 	args := []string{
 		"plan",
 		"-out=plan.tfout",
+		"-refresh=true",
 	}
 	for _, v := range config.Targets {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
@@ -180,11 +176,13 @@ func planCommand(config Config) *exec.Cmd {
 	}
 	for k, v := range config.Vars {
 		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
+		args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
 	}
 	for k, v := range config.Secrets {
-		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
+		if k != "GOOGLE_CREDENTIALS" {
+			args = append(args, "-var")
+			args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
+		}
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
