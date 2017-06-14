@@ -166,7 +166,6 @@ func planCommand(config Config) *exec.Cmd {
 	args := []string{
 		"plan",
 		"-out=plan.tfout",
-		"-refresh=true",
 	}
 	for _, v := range config.Targets {
 		args = append(args, "--target", fmt.Sprintf("%s", v))
@@ -176,13 +175,11 @@ func planCommand(config Config) *exec.Cmd {
 	}
 	for k, v := range config.Vars {
 		args = append(args, "-var")
-		args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
+		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
 	for k, v := range config.Secrets {
-		if k != "GOOGLE_CREDENTIALS" {
-			args = append(args, "-var")
-			args = append(args, fmt.Sprintf("%s=%s", k, os.Getenv(v)))
-		}
+		args = append(args, "-var")
+		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
 	if config.Parallelism > 0 {
 		args = append(args, fmt.Sprintf("-parallelism=%d", config.Parallelism))
